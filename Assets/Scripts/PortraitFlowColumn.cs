@@ -30,12 +30,12 @@ public class PortraitFlowColumn : MonoBehaviour
     
     private int imgCount = 0;
 
-    void Start()
+    private void OnEnable()
     { 
-        EventDispatcher.Instance.Subscribe("CACHED_IMAGES_LOADED", initPortraits);
+        EventDispatcher.Instance.Subscribe("CACHED_IMAGES_LOADED", InitPortraits);
     }
     
-    void initPortraits(object data)
+    private void InitPortraits(object data)
     {
         downloadManager = FindFirstObjectByType<DownloadManager>().GetComponent<DownloadManager>();
 

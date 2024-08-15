@@ -14,7 +14,7 @@ public class EventDispatcher : MonoBehaviour
         {
             if (instance == null)
             {
-                instance = FindObjectOfType<EventDispatcher>();
+                instance = FindFirstObjectByType<EventDispatcher>();
 
                 if (instance == null)
                 {
