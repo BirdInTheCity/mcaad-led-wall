@@ -118,7 +118,7 @@ namespace CabinetOfCuriosities
         }
 
 
-        public static Node[] SearchSolution(int width, int height, Texture2D[] pics, int searchTime)
+        public static Node[] SearchSolution(float width, float height, Texture2D[] pics, int searchTime)
         {
             var targetRatio = (float)width / height;
             var nextPower = NextPowerOfTwo(pics.Length);
@@ -237,7 +237,6 @@ namespace CabinetOfCuriosities
                                 Height = (float)(n.Height * scaleY),
                                 Texture = n.Texture
                             }).ToArray();
-                            Debug.Log("setting winner");
                         }
                     }
                 }

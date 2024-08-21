@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.UI;
-using Utils;
+using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 namespace CabinetOfCuriosities
 {
@@ -11,71 +11,60 @@ namespace CabinetOfCuriosities
     {
         
         public GameObject curiosityPrefab; 
-        public int maxCuriosities = 14;
-        /*public int cols = 8;
-        public int rows = 5;
-        public float gapWidth = 10.0f;
-        public float gapHeight = 10.0f;*/
         
+        [Header("Center Lane")]
+        public int centerMaxPhotos = 7;
+        
+        [Header("Mid Lane")]
+        public int midMaxPhotos = 5;
+        public float midLaneWidth = 150f;
+
+        [Header("Outer Lane")]
+        public int outerMaxPhotos = 3;
+        public float outerLaneWidth = 100f;
+
+        [Header("Border Size")]
+        public float borderSize = 5.0f;
         
         private DownloadManager downloadManager;
         private float defaultWidth;
         private float defaultHeight;
-        private Texture2D[] pics;
-
+        private CabinetLane[] lanes;
         
         
         private void OnEnable()
         { 
             EventDispatcher.Instance.Subscribe("CACHED_IMAGES_LOADED", InitCuriosities);
-            
-            /*
-            defaultWidth = (Screen.width - (gapWidth * (cols + 1))) / cols;
-            defaultHeight = (Screen.height - (gapHeight * (rows + 1))) / rows;
-            */
-
+            lanes = Object.FindObjectsByType<CabinetLane>(FindObjectsSortMode.None)
+                .OrderBy(lane => lane.gameObject.name)
+                .ToArray();
         }
-        
+
         private void InitCuriosities(object data)
         {
-            downloadManager = FindFirstObjectByType<DownloadManager>().GetComponent<DownloadManager>();
-
-            pics = new Texture2D[maxCuriosities];
-
-            for (var i = 0; i < maxCuriosities; i++)
-            {
-                var t= downloadManager.GetNextPortrait();
-                pics[i] = t;
-            }
+            var offsetX = borderSize;
             
-            var solution = Diorama.SearchSolution(Screen.width, Screen.height, pics, 10000);
-            if (solution == null) return;
-            foreach (var t in solution)
+            for (var i=0; i<lanes.Length; i++)
             {
-                // t.Trace();
-                PlaceNextCuriosity(t.Texture, t.X, t.Y, t.Width, t.Height);
+                switch (i)
+                {
+                    case 0:
+                    case 4:
+                        lanes[i].Init(curiosityPrefab, borderSize, outerMaxPhotos, outerLaneWidth, offsetX);
+                        offsetX += outerLaneWidth;
+                        break;
+                    case 1:
+                    case 3:
+                        lanes[i].Init(curiosityPrefab, borderSize, midMaxPhotos, midLaneWidth, offsetX);
+                        offsetX += midLaneWidth;
+                        break;
+                    case 2:
+                        var centerLandWidth = Screen.width - midLaneWidth * 2 - outerLaneWidth * 2 - borderSize;
+                        lanes[i].Init(curiosityPrefab, borderSize, centerMaxPhotos, centerLandWidth, offsetX);
+                        offsetX += centerLandWidth;
+                        break;
+                }
             }
         }
-
-        private void PlaceNextCuriosity(Texture2D texture, float xOffset = 0f, float yOffset = 0f, float width = 1f, float height = 1f)
-        {
-            var curiosity = Instantiate(curiosityPrefab, transform).GetComponent<Curiosity>();
-            curiosity.Init(this, texture, width, height, xOffset, yOffset);
-        }
-        
-        
-        void Update()
-        {
-            /*// Move the image upwards
-            rectTransform.anchoredPosition += Vector2.up * moveSpeed * Time.deltaTime;
-
-            // Reset to bottom of the screen if the image is above the camera view
-            if (!rectTransform.IsVisibleFrom() && rectTransform.GetGUIElementOffset().y < 0 && !destroyed)
-            {
-                Remove();
-            }*/
-    
-        }
-        
     }
 }
