@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dca07d8b77a3f4e898340767595f400e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  imagesFolderName: Portraits
+  imagesFolderName: CuriosityPhotos
 --- !u!1 &130900616
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,11 +747,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   curiosityPrefab: {fileID: 4596391214599439201, guid: 7e28ff2e765049d43afc432dd1148273, type: 3}
-  maxCuriosities: 3
-  cols: 24
-  rows: 15
-  gapWidth: 10
-  gapHeight: 10
+  maxCuriosities: 16
 --- !u!1 &1001525870
 GameObject:
   m_ObjectHideFlags: 0

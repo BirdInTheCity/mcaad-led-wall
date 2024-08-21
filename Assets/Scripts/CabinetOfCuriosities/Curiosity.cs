@@ -32,8 +32,7 @@ namespace CabinetOfCuriosities
             rectTransform.anchoredPosition = new Vector2(0, 1000);
         }
 
-        public void Init(CabinetOfCuriosities cabinet, Texture2D texture, 
-            float width = 1f, float height = 1f, float xOffset = 0f, float yOffset = 0f)
+        public void Init(CabinetOfCuriosities cabinet, Texture2D texture, float width = 1f, float height = 1f, float xOffset = 0f, float yOffset = 0f)
         {
             this.parent = cabinet;
             rectTransform = GetComponent<RectTransform>();
@@ -45,11 +44,7 @@ namespace CabinetOfCuriosities
             
         }
         
-        void Update()
-        {
-            
-        }
-
+    
             
         void Remove()
         {
