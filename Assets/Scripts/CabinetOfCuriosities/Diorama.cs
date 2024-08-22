@@ -18,7 +18,7 @@ namespace CabinetOfCuriosities
         public float AspectRatio { get; set; }
         public bool Dummy { get; set; }
 
-        public Texture2D Texture { get; set; }
+        public Curiosity Curiosity { get; set; }
 
         public void Trace()
         {
@@ -118,7 +118,7 @@ namespace CabinetOfCuriosities
         }
 
 
-        public static Node[] SearchSolution(float width, float height, Texture2D[] pics, int searchTime)
+        public static Node[] SearchSolution(float width, float height, Curiosity[] pics, int searchTime)
         {
             var targetRatio = (float)width / height;
             var nextPower = NextPowerOfTwo(pics.Length);
@@ -147,9 +147,9 @@ namespace CabinetOfCuriosities
                         Y = 0, 
                         Width = 0, 
                         Height = 0, 
-                        AspectRatio = (float) pics[i].width / pics[i].height, 
+                        AspectRatio = (float) pics[i].AspectRatio, 
                         Dummy = false,
-                        Texture = pics[i]
+                        Curiosity = pics[i]
                     };
             }
             
@@ -221,7 +221,7 @@ namespace CabinetOfCuriosities
                             Index = n.Index,
                             Width = n.Width,
                             Height = n.Height,
-                            Texture = n.Texture
+                            Curiosity = n.Curiosity
                         }).ToArray();
                         
                         if (allowCropping)
@@ -235,7 +235,7 @@ namespace CabinetOfCuriosities
                                 Index = n.Index,
                                 Width = (float)(n.Width * scaleX),
                                 Height = (float)(n.Height * scaleY),
-                                Texture = n.Texture
+                                Curiosity = n.Curiosity
                             }).ToArray();
                         }
                     }

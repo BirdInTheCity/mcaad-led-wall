@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using UnityEditor;
-using UnityEditor.SceneManagement;
+﻿using System;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityTimer;
 using Object = UnityEngine.Object;
+using Random = System.Random;
 
 namespace CabinetOfCuriosities
 {
@@ -30,6 +30,7 @@ namespace CabinetOfCuriosities
         private float defaultWidth;
         private float defaultHeight;
         private CabinetLane[] lanes;
+        private int prevLane;
         
         
         private void OnEnable()
@@ -64,6 +65,31 @@ namespace CabinetOfCuriosities
                         offsetX += centerLandWidth;
                         break;
                 }
+            }
+            
+            // Timer.Register(3.0f, SwapNewCuriosity, isLooped: true);
+
+        }
+        
+        private void SwapNewCuriosity()
+        {
+            if (lanes == null || lanes.Length == 0) return;
+
+            int newLaneIndex;
+            do
+            {
+                newLaneIndex = UnityEngine.Random.Range(0, lanes.Length);
+            } while (newLaneIndex == prevLane);
+
+            prevLane = newLaneIndex;
+            lanes[newLaneIndex].SwapNewCuriosity();        
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                SwapNewCuriosity();
             }
         }
     }
