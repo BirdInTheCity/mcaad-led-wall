@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CabinetOfCuriosities
 {
-    public class CabinetLane : MonoBehaviour
+    public class CuriosityColumn : MonoBehaviour
     {
         private DownloadManager downloadManager;
         private GameObject curiosityPrefab;
@@ -60,7 +60,7 @@ namespace CabinetOfCuriosities
 
         private void RefreshSolution()
         {
-            var solution = Diorama.SearchSolution(rectTransform.rect.width, rectTransform.rect.height - borderSize,
+            var solution = CuriosityPlacement.SearchSolution(rectTransform.rect.width, rectTransform.rect.height - borderSize,
                 placedCuriosities, 200);
             
             if (solution == null) return;

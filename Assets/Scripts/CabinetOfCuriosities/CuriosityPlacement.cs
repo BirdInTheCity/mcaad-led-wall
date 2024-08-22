@@ -33,7 +33,7 @@ namespace CabinetOfCuriosities
         public float Max { get; set; }
     }
 
-    public class Diorama : MonoBehaviour
+    public class CuriosityPlacement : MonoBehaviour
     {
         private const int BIG = 999999999;
 

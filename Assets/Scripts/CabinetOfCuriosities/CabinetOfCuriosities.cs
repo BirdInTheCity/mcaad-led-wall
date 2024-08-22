@@ -29,14 +29,14 @@ namespace CabinetOfCuriosities
         private DownloadManager downloadManager;
         private float defaultWidth;
         private float defaultHeight;
-        private CabinetLane[] lanes;
+        private CuriosityColumn[] lanes;
         private int prevLane;
         
         
         private void OnEnable()
         { 
             EventDispatcher.Instance.Subscribe("CACHED_IMAGES_LOADED", InitCuriosities);
-            lanes = Object.FindObjectsByType<CabinetLane>(FindObjectsSortMode.None)
+            lanes = Object.FindObjectsByType<CuriosityColumn>(FindObjectsSortMode.None)
                 .OrderBy(lane => lane.gameObject.name)
                 .ToArray();
         }
