@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.UI;
 
 public class DownloadManager : MonoBehaviour
 {
+    public string instanceName = "";
     public string imagesFolderName = "Portraits";
     private string strapiImagesEndpoint = "https://picsum.photos/200/300";
 
@@ -44,7 +41,7 @@ public class DownloadManager : MonoBehaviour
             }
         }
         this.allTexturesLoaded = true;
-        EventDispatcher.Instance.Dispatch("CACHED_IMAGES_LOADED", null);
+        EventDispatcher.Instance.Dispatch("CACHED_IMAGES_LOADED", this.instanceName);
 
     }
     

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Random = System.Random;
 
 namespace CabinetOfCuriosities
 {
@@ -10,6 +13,9 @@ namespace CabinetOfCuriosities
         private float borderSize = 5.0f;
         private Curiosity[] placedCuriosities;
         private RectTransform rectTransform;
+        private float width;
+        private float oldSolution;
+        
 
         private void Awake()
         {
@@ -21,12 +27,14 @@ namespace CabinetOfCuriosities
         {
             curiosityPrefab = prefab;
             borderSize = border;
+            width = laneWidth;
 
             rectTransform.sizeDelta = new Vector2(laneWidth - border, rectTransform.sizeDelta.y);
             rectTransform.anchoredPosition = new Vector2(offsetX, rectTransform.anchoredPosition.y);
 
             // init download manager        
-            downloadManager = FindFirstObjectByType<DownloadManager>().GetComponent<DownloadManager>();
+            downloadManager = FindObjectsByType<DownloadManager>(FindObjectsSortMode.None)
+                .First(item => item.instanceName == "CabinetOfCuriosities");
 
             // init curiosities
             placedCuriosities = new Curiosity[maxCuriosities];
@@ -55,15 +63,36 @@ namespace CabinetOfCuriosities
             }
 
             closestAspect.UpdateTexture(newImg);
+            
+            
+            /*
+            var random = new Random();
+            var index = random.Next(0, placedCuriosities.Length);
+            
+            var curiosity = Instantiate(curiosityPrefab, transform).GetComponent<Curiosity>();
+            curiosity.UpdateTexture(downloadManager.GetNextPortrait());
+            
+            CuriosityPlacement.SwapImage(placedCuriosities, index, curiosity, rectTransform.rect.width, rectTransform.rect.height - borderSize, 200); 
+            */
+            
             RefreshSolution();
         }
 
-        private void RefreshSolution()
+        private async void RefreshSolution()
         {
-            var solution = CuriosityPlacement.SearchSolution(rectTransform.rect.width, rectTransform.rect.height - borderSize,
+            var solution = await CuriosityPlacement.SearchSolutionAsync(rectTransform.rect.width, rectTransform.rect.height - borderSize,
                 placedCuriosities, 200);
             
             if (solution == null) return;
+            
+            
+            var nameIndex = 0;
+            foreach (var node in solution)
+            {
+                node.Curiosity.gameObject.name = "Curiosity " + nameIndex++;
+            }
+            
+            
             
             foreach (var node in solution)
             {
@@ -71,5 +100,11 @@ namespace CabinetOfCuriosities
                 node.Curiosity.RefreshPlacement(node.Width - xOffset, node.Height - borderSize, node.X + xOffset, node.Y + borderSize);
             }
         }
+        
+       
+        
+ 
+        
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -56,6 +57,17 @@ namespace CabinetOfCuriosities
             foreach (var node in arr)
             {
                 stringBuilder.Append(node.AspectRatio + " ");
+            }
+            Debug.Log(stringBuilder.ToString().Trim());
+            
+        }
+        
+        public static void TraceArrayNames(Node[] arr)
+        {
+            var stringBuilder = new StringBuilder();
+            foreach (var node in arr)
+            {
+                stringBuilder.Append(node.Curiosity.name + " ");
             }
             Debug.Log(stringBuilder.ToString().Trim());
             
@@ -116,10 +128,20 @@ namespace CabinetOfCuriosities
             var shuffled = Shuffle(GetRange(arr, start, end - start));
             ArrayReplaceIn(shuffled, arr);
         }
-
-
-        public static Node[] SearchSolution(float width, float height, Curiosity[] pics, int searchTime)
+        
+        public static async Task<Node[]> SearchSolutionAsync(float width, float height, Curiosity[] fullSet, int searchTime)
         {
+            return await Task.Run(() =>
+            {
+                return SearchSolution(width, height, fullSet, searchTime);
+            });
+        }
+
+
+        public static Node[] SearchSolution(float width, float height, Curiosity[] fullSet, int searchTime)
+        {
+            Curiosity[] pics = fullSet.Where(item => !item.markedForDeletion).ToArray();
+            
             var targetRatio = (float)width / height;
             var nextPower = NextPowerOfTwo(pics.Length);
             var fullArray = DummyArray((nextPower << 1) - 1);

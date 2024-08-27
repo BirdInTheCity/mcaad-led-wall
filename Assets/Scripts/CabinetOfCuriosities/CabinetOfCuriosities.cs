@@ -3,7 +3,6 @@ using System.Linq;
 using UnityEngine;
 using UnityTimer;
 using Object = UnityEngine.Object;
-using Random = System.Random;
 
 namespace CabinetOfCuriosities
 {
@@ -11,6 +10,9 @@ namespace CabinetOfCuriosities
     {
         
         public GameObject curiosityPrefab; 
+        [Header("Timer (Seconds)")]
+        public float imageSwapTimer = 3.0f;
+        
         
         [Header("Center Lane")]
         public int centerMaxPhotos = 7;
@@ -26,7 +28,6 @@ namespace CabinetOfCuriosities
         [Header("Border Size")]
         public float borderSize = 5.0f;
         
-        private DownloadManager downloadManager;
         private float defaultWidth;
         private float defaultHeight;
         private CuriosityColumn[] lanes;
@@ -43,6 +44,8 @@ namespace CabinetOfCuriosities
 
         private void InitCuriosities(object data)
         {
+            if ((string) data != "CabinetOfCuriosities") return;
+            
             var offsetX = borderSize;
             
             for (var i=0; i<lanes.Length; i++)
@@ -67,8 +70,7 @@ namespace CabinetOfCuriosities
                 }
             }
             
-            // Timer.Register(3.0f, SwapNewCuriosity, isLooped: true);
-
+            Timer.Register(imageSwapTimer, SwapNewCuriosity, isLooped: true);
         }
         
         private void SwapNewCuriosity()

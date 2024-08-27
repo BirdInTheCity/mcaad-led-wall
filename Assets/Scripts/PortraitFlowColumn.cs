@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,8 +38,12 @@ public class PortraitFlowColumn : MonoBehaviour
     
     private void InitPortraits(object data)
     {
-        downloadManager = FindFirstObjectByType<DownloadManager>().GetComponent<DownloadManager>();
+        if ((string) data != "PortraitFlow") return;
 
+        
+        downloadManager = FindObjectsByType<DownloadManager>(FindObjectsSortMode.None)
+            .First(item => item.instanceName == "PortraitFlow");
+        
         for(int i = 0; i < 4; i++)
         {
             PlaceNextPortrait();
