@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using ChocDino.UIFX;
+using DG.Tweening;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -10,92 +13,97 @@ namespace CabinetOfCuriosities
 {
     public class Curiosity : MonoBehaviour
     {
-        public Texture2D Texture;
-        public float AspectRatio => (Texture != null) ? (float) Texture.width / Texture.height : 0.0f;
-        public bool markedForDeletion = false;
+        [FormerlySerializedAs("Texture")] public Texture2D texture;
+        public Texture2D newTexture;
+            public float slideTime = 1.8f;
+        public float inOutTime = 0.8f;
+        public float overlapTime = 0.2f;
+        public float AspectRatio => (newTexture ? (float) newTexture.width / newTexture.height : 
+            texture ? (float) texture.width/texture.height : 0f);
 
-      
+        public DateTime? LastUpdated = DateTime.MinValue;
+        public int ColumnId { get; set; }
+
+        
+        private RectTransform parentRect;
         private RectTransform rectTransform;
         private Image image;
         private AspectRatioFitter fitter;
-        private bool initialized = false;
-        private VertexSkew skew;
+        
+        // Define a color constant
+        private Color darkGrey = new Color(0.2f, 0.2f, 0.2f, 0.0f);
+        [FormerlySerializedAs("initialized")] public bool visible = false;
         
         
         void OnEnable()
         {
             image = GetComponentInChildren<Image>();
             fitter = GetComponentInChildren<AspectRatioFitter>();
-            rectTransform = GetComponentInChildren<RectTransform>();
-            // skew = GetComponentInChildren<VertexSkew>();
-            
-            rectTransform.sizeDelta = Vector2.zero;
+            parentRect = GetComponent<RectTransform>();
+            rectTransform = transform.GetChild(0).GetComponentInChildren<RectTransform>();
+
+            rectTransform.localScale = Vector3.zero;
         }
         
         public void RefreshPlacement(float width = 1f, float height = 1f, float xOffset = 0f, float yOffset = 0)
         {
-            StartCoroutine(AnimatePlacement(new Vector2(xOffset, yOffset), new Vector2(width, height), 0.8f));
-        }
-
-        /*public void AnimateIn()
-        {
-
-            StartCoroutine(AnimateInCoroutine(0.8f));
-        }
-        
-        public void AnimateOut()
-        {
-            // Create a coroutine to animate the Curiosity
-            StartCoroutine(AnimateOutCoroutine(0.4f));
-        }*/
-        
-        private IEnumerator AnimatePlacement(Vector2 targetPosition, Vector2 targetSize, float duration, float delay = 0f)
-        {
-            var startPosition = rectTransform.anchoredPosition;
-            var startSize = rectTransform.sizeDelta;
-            var elapsedTime = 0f;
-            var startSkewStrength = 0f;
-            var targetSkewStrength = 0f;
-
-            if (!initialized)
-            {
-                var xOffset = 40.0f;
-                var yOffset = 10.0f;
-                var sizeOffset = .4f;
-                var skewOffset = 11f;
-                delay = .8f;
-                
-                startPosition = new Vector2(targetPosition.x, targetPosition.y);
-                startSize = new Vector2(0f, targetSize.y);
-                startSkewStrength = 1f;
-                
-                rectTransform.anchoredPosition = startPosition;
-                rectTransform.sizeDelta = startSize;
-                // skew.Strength = startSkewStrength;
-            }
+            var newSize = new Vector2(width, height);
+            var newPosition = new Vector2(xOffset, yOffset);
             
-            elapsedTime = - Random.value * delay;
-
-            while (elapsedTime < duration)
+            if (!visible)
+                AnimateIn();
+            else if (newTexture != null)
+                AnimateOut();                   
+            else
+                AnimateUpdate();
+            return;
+            
+            
+            void AnimateUpdate()
             {
-                // Eased time
-                var t = (float) MaterialEasing(  elapsedTime / duration);
-                
-                rectTransform.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, t);
-                rectTransform.sizeDelta = Vector2.Lerp(startSize, targetSize, t);
-                // skew.Strength = Mathf.Lerp(startSkewStrength, targetSkewStrength, t);
-                elapsedTime += Time.deltaTime;
-                yield return null;
+                var mySequence = DOTween.Sequence();
+                mySequence.Insert(inOutTime - overlapTime, parentRect.DOAnchorPos(newPosition, slideTime).SetEase(Ease.InOutExpo));
+                mySequence.Insert(inOutTime - overlapTime, parentRect.DOSizeDelta(newSize, slideTime).SetEase(Ease.InOutExpo));
+
+                mySequence.Play();
+                return;
             }
 
-            rectTransform.anchoredPosition = targetPosition;
-            rectTransform.sizeDelta = targetSize;
-            // skew.Strength = targetSkewStrength;
-            
-            initialized = true;
+            void AnimateOut()
+            {
+                visible = false;
 
-            yield return null;
+                var mySequence = DOTween.Sequence();
+                mySequence.Insert(0, rectTransform.DORotate(new Vector3(0f, 90f, 0f), inOutTime).SetEase(Ease.InExpo));
+                mySequence.Insert(0, rectTransform.DOScale(new Vector3(.6f, .6f, 1f), inOutTime).SetEase(Ease.InExpo));
+                mySequence.Insert(0, image.DOColor(darkGrey, inOutTime).SetEase(Ease.InExpo));
+                mySequence.InsertCallback(inOutTime, () =>RefreshPlacement(width, height, xOffset, yOffset));
+                mySequence.Play();
+                return;
+            }
+
+            void AnimateIn()
+            {
+                UpdateTexture();
+
+                // Set start values
+                parentRect.anchoredPosition = newPosition;
+                parentRect.sizeDelta = newSize;
+                rectTransform.localRotation = Quaternion.Euler(0f, -90f, 0f);
+                rectTransform.localScale = new Vector3(.6f, .6f, 1f);
+                image.color = darkGrey;
+                
+                var mySequence = DOTween.Sequence();
+                mySequence.Insert(slideTime - 2 * overlapTime, rectTransform.DORotate(Vector3.zero, inOutTime).SetEase(Ease.OutExpo));
+                mySequence.Insert(slideTime - 2 * overlapTime, rectTransform.DOScale(Vector3.one, inOutTime).SetEase(Ease.OutExpo));
+                mySequence.Insert(slideTime - 2 * overlapTime, image.DOColor(Color.white, inOutTime).SetEase(Ease.OutExpo));
+                mySequence.Play();
+                
+                visible = true; 
+                return;
+            }
         }
+        
         
         private float EaseInOutQuad(float t)
         {
@@ -109,83 +117,22 @@ namespace CabinetOfCuriosities
         {
             return 1 - Math.Pow(1 - x, 3);
         }
-        
-        
-        public void UpdateTexture(Texture2D texture)
+
+        public void ReplaceCurrentTexture(Texture2D incomingTexture)
         {
-            if (texture == null && image == null) return;
-            image.sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-            Texture = texture;
+            newTexture = incomingTexture;
+        }
+        
+        
+        private void UpdateTexture()
+        {
+            if (newTexture == null) return;
+            texture = newTexture;
+            newTexture = null;
             
-            if (fitter == null) return;
+            image.sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             fitter.aspectRatio = (float) texture.width / texture.height;
         }
-
-        /*
-        private IEnumerator AnimateInCoroutine(float duration)
-        {
-            // Record the initial scale and opacity
-            float initialScale = transform.localScale.x;
-            float initialOpacity = GetComponent<Renderer>().material.color.a;
-
-            // Calculate the target scale and opacity
-            float targetScale = 0.4f;
-            float targetOpacity = 0f;
-
-            // Animate the scale and opacity over the duration
-            float elapsedTime = 0f;
-            while (elapsedTime < duration)
-            {
-                float t = elapsedTime / duration;
-                t = t * t * (3f - 2f * t); // Smoothstep function
-
-                transform.localScale = Vector3.one * Mathf.Lerp(initialScale, targetScale, t);
-                GetComponent<Renderer>().material.color = new Color(GetComponent<Renderer>().material.color.r, GetComponent<Renderer>().material.color.g, GetComponent<Renderer>().material.color.b, Mathf.Lerp(initialOpacity, targetOpacity, t));
-
-                elapsedTime += Time.deltaTime;
-                yield return null;
-            }
-
-            // Ensure the scale and opacity are exactly at the target values
-            transform.localScale = Vector3.one * targetScale;
-            GetComponent<Renderer>().material.color = new Color(GetComponent<Renderer>().material.color.r, GetComponent<Renderer>().material.color.g, GetComponent<Renderer>().material.color.b, targetOpacity);
-
-            
-            yield return null;
-        }
-
-        private IEnumerator AnimateOutCoroutine(float duration)
-        {
-            // Record the initial scale and opacity
-            float initialScale = transform.localScale.x;
-            float initialOpacity = GetComponent<Renderer>().material.color.a;
-
-            // Calculate the target scale and opacity
-            float targetScale = 0.4f;
-            float targetOpacity = 0f;
-
-            // Animate the scale and opacity over the duration
-            float elapsedTime = 0f;
-            while (elapsedTime < duration)
-            {
-                float t = elapsedTime / duration;
-                t = t * t * (3f - 2f * t); // Smoothstep function
-
-                transform.localScale = Vector3.one * Mathf.Lerp(initialScale, targetScale, t);
-                GetComponent<Renderer>().material.color = new Color(GetComponent<Renderer>().material.color.r, GetComponent<Renderer>().material.color.g, GetComponent<Renderer>().material.color.b, Mathf.Lerp(initialOpacity, targetOpacity, t));
-
-                elapsedTime += Time.deltaTime;
-                yield return null;
-            }
-
-            // Ensure the scale and opacity are exactly at the target values
-            transform.localScale = Vector3.one * targetScale;
-            GetComponent<Renderer>().material.color = new Color(GetComponent<Renderer>().material.color.r, GetComponent<Renderer>().material.color.g, GetComponent<Renderer>().material.color.b, targetOpacity);
-
-            // Remove and destroy the Curiosity
-            Destroy(gameObject);
-        }
-        */
         
         
         

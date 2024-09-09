@@ -1,3 +1,4 @@
+using Shapes;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,13 +11,14 @@ public class PortraitManager : MonoBehaviour
     private PortraitFlowColumn portraitFlowColumn;
     private bool destroyed = false;
     private Image image;
+    private Rectangle rectangle;
 
     void OnEnable()
     {
         rectTransform = GetComponent<RectTransform>();
         startY = rectTransform.anchoredPosition.y;
         image = GetComponentInChildren<Image>();
-
+        rectangle = GetComponentInChildren<Rectangle>();
         
 
     }
@@ -29,6 +31,12 @@ public class PortraitManager : MonoBehaviour
         this.rectTransform.sizeDelta = new Vector2(size * 100f, size * 100f);
         // this.rectTransform.sizeDelta = new Vector2(150, 150);
         this.rectTransform.anchoredPosition = new Vector2(xOffset, yOffset);
+
+        if (rectangle)
+        {
+            rectangle.Height = this.rectTransform.sizeDelta.y;
+            rectangle.Width = this.rectTransform.sizeDelta.x;
+        }
         
         // Calculate move speed based on the scale of the image
         // Smaller images (smaller scale) move slower
@@ -46,7 +54,7 @@ public class PortraitManager : MonoBehaviour
         rectTransform.anchoredPosition += Vector2.up * moveSpeed * Time.deltaTime;
 
         // Reset to bottom of the screen if the image is above the camera view
-        if (!rectTransform.IsVisibleFrom() && rectTransform.GetGUIElementOffset().y < 0 && !destroyed)
+        if (!rectTransform.IsVisibleFrom() && rectTransform.GetGUIElementOffset().y < -100 && !destroyed)
         {
             RemovePortrait();
         }

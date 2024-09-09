@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 78405b8930380f7469814b4977d5cef1
+timeCreated: 1485701565
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 81722
+  packageName: Settings / Config file
+  packageVersion: 1.0
+  assetPath: Assets/Settings/Demo/testScene.unity
+  uploadId: 159091

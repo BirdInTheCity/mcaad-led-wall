@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ab3ba7ff6ff00b24c8e78d1c15757f43
+timeCreated: 1485705515
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 81722
+  packageName: Settings / Config file
+  packageVersion: 1.0
+  assetPath: Assets/Settings/Prefabs/SettingsSingleton.prefab
+  uploadId: 159091

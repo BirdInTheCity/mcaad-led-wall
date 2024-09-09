@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = System.Random;
@@ -8,12 +7,13 @@ namespace CabinetOfCuriosities
 {
     public class CuriosityColumn : MonoBehaviour
     {
+        public int ColumnId;
+        
         private DownloadManager downloadManager;
         private GameObject curiosityPrefab;
         private float borderSize = 5.0f;
         private Curiosity[] placedCuriosities;
         private RectTransform rectTransform;
-        private float width;
         private float oldSolution;
         
 
@@ -23,14 +23,14 @@ namespace CabinetOfCuriosities
         }
 
 
-        public void Init(GameObject prefab, float border, int maxCuriosities, float laneWidth, float offsetX)
+        public void Init(int id, GameObject prefab, float border, int maxCuriosities, Vector2 laneSize, float offsetX)
         {
+            ColumnId = id;
             curiosityPrefab = prefab;
             borderSize = border;
-            width = laneWidth;
 
-            rectTransform.sizeDelta = new Vector2(laneWidth - border, rectTransform.sizeDelta.y);
-            rectTransform.anchoredPosition = new Vector2(offsetX, rectTransform.anchoredPosition.y);
+            rectTransform.sizeDelta = new Vector2(laneSize.x - border, laneSize.y);
+            rectTransform.anchoredPosition = new Vector2(offsetX, Screen.height * 0.5f);
 
             // init download manager        
             downloadManager = FindObjectsByType<DownloadManager>(FindObjectsSortMode.None)
@@ -41,70 +41,52 @@ namespace CabinetOfCuriosities
             for (var i = 0; i < maxCuriosities; i++)
             {
                 placedCuriosities[i] = Instantiate(curiosityPrefab, transform).GetComponent<Curiosity>();
-                placedCuriosities[i].UpdateTexture(downloadManager.GetNextPortrait());
+                placedCuriosities[i].ColumnId = ColumnId;
+                placedCuriosities[i].ReplaceCurrentTexture(downloadManager.GetNextPortrait());
             }
             RefreshSolution();
         }
 
+        public Curiosity[] GetCuriosities()
+        {
+            return placedCuriosities;
+        }
+
         public void SwapNewCuriosity()
         {
-            var newImg = downloadManager.GetNextPortrait();
-            var aspectRatio = newImg.width / (float) newImg.height;
-            var closestAspect = placedCuriosities[0];
-            
-            
-            // Find the closest aspect
-            foreach (var t in placedCuriosities)
-            {
-                if (Math.Abs(t.AspectRatio - aspectRatio) < Math.Abs(closestAspect.AspectRatio - aspectRatio)) 
-                    continue;
-                closestAspect = t;
-                break;
-            }
-
-            closestAspect.UpdateTexture(newImg);
-            
-            
-            /*
-            var random = new Random();
-            var index = random.Next(0, placedCuriosities.Length);
-            
-            var curiosity = Instantiate(curiosityPrefab, transform).GetComponent<Curiosity>();
-            curiosity.UpdateTexture(downloadManager.GetNextPortrait());
-            
-            CuriosityPlacement.SwapImage(placedCuriosities, index, curiosity, rectTransform.rect.width, rectTransform.rect.height - borderSize, 200); 
-            */
-            
+            var index = new Random().Next(0, placedCuriosities.Length);
+            var curiosity = placedCuriosities.OrderBy(c => c.LastUpdated).First();
+            curiosity.ReplaceCurrentTexture(downloadManager.GetNextPortrait());
+            curiosity.LastUpdated = DateTime.Now;
             RefreshSolution();
         }
 
         private async void RefreshSolution()
         {
             var solution = await CuriosityPlacement.SearchSolutionAsync(rectTransform.rect.width, rectTransform.rect.height - borderSize,
-                placedCuriosities, 200);
-            
-            if (solution == null) return;
-            
-            
-            var nameIndex = 0;
-            foreach (var node in solution)
+                placedCuriosities, 500);
+
+            if (solution == null)
             {
-                node.Curiosity.gameObject.name = "Curiosity " + nameIndex++;
+                Debug.Log("NO SOLUTION FOUND");
+                return;
             }
             
             
-            
+            var nameIndex = 0; 
             foreach (var node in solution)
             {
+                if (node.Curiosity == null) return;
+                node.Curiosity.gameObject.name = "Curiosity " + nameIndex++;
+            }
+            
+
+            foreach (var node in solution)
+            {
+                var c = node.Curiosity;
                 var xOffset = node.X == 0 ? 0 : borderSize;
                 node.Curiosity.RefreshPlacement(node.Width - xOffset, node.Height - borderSize, node.X + xOffset, node.Y + borderSize);
             }
         }
-        
-       
-        
- 
-        
-
     }
 }

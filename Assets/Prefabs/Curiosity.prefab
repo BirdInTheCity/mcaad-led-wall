@@ -59,8 +59,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0be35b286d646968145d5ade2bfc6b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Texture: {fileID: 0}
-  markedForDeletion: 0
+  texture: {fileID: 0}
+  newTexture: {fileID: 0}
+  animTime: 1
+  slideTime: 1.8
+  inOutTime: 1
+  overlapTime: 0.2
+  visible: 0
 --- !u!114 &3856438813326204315
 MonoBehaviour:
   m_ObjectHideFlags: 0

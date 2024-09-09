@@ -22,7 +22,10 @@ namespace DefaultNamespace
         {
             CabinetOfCuriosities.alpha = 1.0f;
             PortraitFlow.alpha = 0.0f;
+            // Set localscale to fill the screen
             
+            var scale = Screen.width / 1200f;
+            PortraitFlow.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
             Timer.Register(ViewToggleTimer, Toggle, isLooped: true);
         }
 
@@ -62,6 +65,11 @@ namespace DefaultNamespace
             if (Input.GetKeyDown(KeyCode.Return))
             {
                 Toggle();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
             }
         }
     }

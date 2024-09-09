@@ -84,7 +84,7 @@ namespace CabinetOfCuriosities
             return array;
         }
 
-        private static T[] Shuffle<T>(T[] array)
+        public static T[] Shuffle<T>(T[] array)
         {
             var random = new System.Random();
             for (var i = array.Length - 1; i > 0; i--)
@@ -140,7 +140,7 @@ namespace CabinetOfCuriosities
 
         public static Node[] SearchSolution(float width, float height, Curiosity[] fullSet, int searchTime)
         {
-            Curiosity[] pics = fullSet.Where(item => !item.markedForDeletion).ToArray();
+            Curiosity[] pics = fullSet;
             
             var targetRatio = (float)width / height;
             var nextPower = NextPowerOfTwo(pics.Length);

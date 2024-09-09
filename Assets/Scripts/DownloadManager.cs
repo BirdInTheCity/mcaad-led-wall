@@ -17,13 +17,13 @@ public class DownloadManager : MonoBehaviour
 
     private void Start()
     {
-        imagesCachePath = Application.dataPath + "/" + imagesFolderName + "/";
+        imagesCachePath = Application.streamingAssetsPath + "/" + imagesFolderName + "/";
         LoadAllImages();
     }
+    
 
     void LoadAllImages()
     {
-        
         var imageFiles = Directory.GetFiles(imagesCachePath, "*.*", SearchOption.TopDirectoryOnly)
             .Where(file => file.EndsWith(".jpg") || file.EndsWith(".png")).ToArray();
         
